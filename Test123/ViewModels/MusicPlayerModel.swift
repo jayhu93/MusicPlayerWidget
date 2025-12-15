@@ -76,6 +76,13 @@ import Combine
   
   init() {
     loadCurrentTrack()
+    
+    // Subscribe to track completion events
+    audioService.trackDidFinish
+      .sink { [weak self] in
+        self?.handleTrackCompletion()
+      }
+      .store(in: &cancellables)
   }
   
   func loadCurrentTrack() {
@@ -123,15 +130,24 @@ import Combine
   
   private func switchToCurrentTrack() {
     guard let track = currentTrack else { return }
-    Task {
-      await audioService.switchTrack(to: track.audioURL)
-      // Auto-play the new track
-      audioService.play()
-    }
+    audioService.switchTrack(to: track.audioURL)
+    // Auto-play the new track
+    audioService.play()
   }
   
   func toggleRepeat() {
     isRepeatEnabled.toggle()
+  }
+  
+  // Handle track completion - advance to next track if possible
+  private func handleTrackCompletion() {
+    if canGoToNext {
+      skipToNext()
+    } else {
+      // If we can't go to next (not in repeat mode and at last track),
+      // just stop playback
+      audioService.pause()
+    }
   }
   
   // Helper function to format time

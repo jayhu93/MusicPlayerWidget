@@ -12,6 +12,9 @@ import Combine
   var duration: Double = 0
   var bufferedTime: Double = 0
   
+  // Publisher to notify when track finishes playing
+  let trackDidFinish = PassthroughSubject<Void, Never>()
+  
   init() {
     self.player = AVPlayer()
     do {
@@ -45,6 +48,8 @@ import Combine
       self?.isPlaying = false
       self?.currentTime = 0
       self?.player.seek(to: .zero)
+      // Notify that track has finished
+      self?.trackDidFinish.send()
     }
     
     // Add time observer
@@ -108,7 +113,7 @@ import Combine
     currentTime = time
   }
   
-  func switchTrack(to urlString: String) async {
+  func switchTrack(to urlString: String) {
     // Clean up current player
     if let observer = timeObserver {
       player.removeTimeObserver(observer)
