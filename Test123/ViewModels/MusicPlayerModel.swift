@@ -143,10 +143,6 @@ import Combine
   private func handleTrackCompletion() {
     if canGoToNext {
       skipToNext()
-    } else {
-      // If we can't go to next (not in repeat mode and at last track),
-      // just stop playback
-      audioService.pause()
     }
   }
   
